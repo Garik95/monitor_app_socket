@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Отчеты</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='/css/bootstrap.min.css'>
+    <script src='/js/bootstrap.min.js'></script>
+</head>
+<body onload="loadResults()">
+    <div class="container">
+        <table class="table" id="gable">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">REPORT_ID</th>
+                <th scope="col">PARAMS</th>
+                <th scope="col">STATUS</th>
+                <th scope="col">ACTION</th>
+              </tr>
+            </thead>
+        </table>
+    </div>
+</body>
+<script>
+    function loadResults() {
+        xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200)
+            {
+            var data = JSON.parse(this.responseText)
+            var table = document.getElementById('gable');
+            data.recordset.forEach(function(object) {
+                var tr = document.createElement('tr');
+                tr.innerHTML = 
+                '<td>' + object.ID + '</td>' +
+                '<td>' + object.REPORT_ID + '</td>' + 
+                '<td>' + object.PARAMS + '</td>' +
+                '<td>' + object.STATUS + '</td>' + 
+                '<td><a href="/download?reportid=' + object.ID + '" class="btn btn-warning">Скачать</a></td>';
+                table.appendChild(tr);
+            });}
+        }
+        xmlhttp.open("GET", 'http://localhost:5000/requests?status=2');
+        xmlhttp.send();
+    }
+</script>
+</html>

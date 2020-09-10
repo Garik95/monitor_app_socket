@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Отчеты</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='/css/bootstrap.min.css'>
+    <script src='/js/bootstrap.min.js'></script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-xl-5">
+                        <h1>Running Apps:</h1>
+                    </div>
+                    <div class="col-xl-6"></div>
+                    <div class="col-xl-1">
+                        <a href="/">
+                            <svg width="3em" height="3em" viewBox="0 0 16 16" class="bi bi-arrow-repeat" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+                                <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        <div class="row">
+            <div class="col-xl-1"></div>
+            <div class="col-xl-10">
+                <table class="table">
+                    <thead>
+                        <tr>
+                          <th scope="col">Thread ID</th>
+                          <th scope="col">Address</th>
+                          <th scope="col">Appname</th>
+                          <th scope="col">State</th>
+                          <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <% allClients.forEach(function(app) { %>
+                    <tbody>
+                        <th><%= app.ID %></th>
+                        <th><%= app.address %></th>
+                        <th><%= app.client %></th>
+                        <th>
+                            <% if (app.status == 0) {%> <span class="badge badge-pill badge-danger">&nbsp;</span><%}%>
+                            <% if (app.status == 1) {%> <span class="badge badge-pill badge-warning">&nbsp;</span><%}%>
+                            <% if (app.status == 2) {%> <span class="badge badge-pill badge-success">&nbsp;</span><%}%>
+                        </th>
+                        <th>
+                            <% if (app.status == 0) {%><a href="/init?id=<%= app.ID %>" class="badge badge-success">Init</a><%}%>
+                            <% if (app.status == 2) {%>
+                                <a href="#" class="badge badge-warning">Reload</a>
+                                <a href="/quit?id=<%= app.ID %>" class="badge badge-danger">Shut down</a>
+                            <%}%>
+                            <!-- <a href="/terminate?thread=<%= app.ID %>" type="submit" class="btn btn-outline-danger">
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-stop-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/>
+                                </svg>
+                            </a> -->
+                        </th>
+                    </tbody>
+                    <% }); %>
+                </table>
+            </div>
+            <div class="col-xl-1"></div>
+        </div>
+        </div>
+    </div>
+</body>
+</html>
