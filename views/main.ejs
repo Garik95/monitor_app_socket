@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Отчеты</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <!-- <link rel='stylesheet' type='text/css' media='screen' href='/css/bootstrap.min.css'> -->
+    <link rel='stylesheet' type='text/css' media='screen' href='/css/bootstrap-dark.css'>
+    <script src='/js/bootstrap.js'></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="/">Monitor App!!!</a>
+      </nav>
+    <div class="row">
+        <div class="col-xl-2">
+            <div class="list-group" style="text-align:center">
+                <a href="/" class="list-group-item list-group-item-action">Projects</a>
+                <a href="/server_state" class="list-group-item list-group-item-action">Servers</a>
+            </div>
+        </div>
+        <div class="col-xl-10">
+            <% if(part == 'servers') {%> <%- include('servers_partial.ejs') %><% } %>
+            <% if(part == 'projects') {%> <%- include('projects_partial.ejs') %><% } %>
+            <% if(part == 'logs') {%> <%- include('logs_partial.ejs') %><% } %>
+        </div>
+    </div>
+</body>
+</html>

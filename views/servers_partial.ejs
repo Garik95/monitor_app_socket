@@ -1,0 +1,21 @@
+<table class="table table-hover">
+    <thead>
+        <tr>
+        <th style="text-align:center" scope="col">Hostname</th>
+        <th style="text-align:center" scope="col">IP</th>
+        <th style="text-align:center" scope="col">PID</th>
+        <th style="text-align:center" scope="col">Status</th>
+        </tr>
+    </thead>
+    <% serverStates.reverse().forEach(function(app) { %>
+    <tbody>
+        <th style="text-align:center"><%= app.hostname %></th>
+        <th style="text-align:center"><%= app.ip %></th>
+        <th style="text-align:center"><%= app.pid %></th>
+        <th style="text-align:center">
+            <% if (app.status == 'ok') {%><span class="badge badge-pill badge-success">&nbsp;</span><%}%>
+            <% if (app.status == 'end') {%><span class="badge badge-pill badge-danger">&nbsp;</span><%}%>
+        </th>
+    </tbody>
+    <% }); %>
+</table>

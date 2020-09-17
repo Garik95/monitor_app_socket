@@ -1,0 +1,5 @@
+<textarea rows="40" style="width: 100%;color: green;background-color: black;">
+    <% logs.reverse().forEach(function(line) { %>
+        <%= line.Appname %> - <%= line.timestamp %>: <%= line.message %>
+        <% }) %>
+</textarea>
