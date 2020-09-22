@@ -26,11 +26,15 @@ sql.connect(config, function (err) {
     if(err) {console.log(err);}
 
     var request = new sql.Request();
-    
+    request.query(`select * from REPORTS`, function(err,result) {
+        if(err) console.log(err);
+        allClients = result.recordset;
+    })
+
     app.get('/',function(req,res) {
         request.query(`select * from REPORTS`, function(err,result) {
             if(err) console.log(err);
-            allClients = result.recordset;
+            if(allClients.length === 0) allClients = result.recordset;
                 res.render(__dirname + '\\views\\main.ejs',{allClients:allClients,clientLogs:sorter.sort(clientLogs).asc('timestamp'),part:'projects'});
         });
     });
@@ -98,6 +102,7 @@ io.on('connection', socket => {
                 elem['status'] = 0;
             }
         });
+        socket.join(socket.id);
         console.log(data + ' connected!');
     });
 
