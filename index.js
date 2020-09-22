@@ -24,36 +24,46 @@ var config = {
 
 sql.connect(config, function (err) {
     if(err) {console.log(err);}
-    var request = new sql.Request();
-    request.query(`select * from REPORTS`, function(err,result) {
-        if(err) console.log(err);
-        allClients = result.recordset;
-io.on('connection', socket => {
-    app.get('/',function(req,res) {
-        res.render(__dirname + '\\views\\main.ejs',{allClients:allClients,clientLogs:sorter.sort(clientLogs).asc('timestamp'),part:'projects'});
-    });
 
-    app.get('/reset', function(req,res) {
-        var request = new sql.Request();
+    var request = new sql.Request();
+    
+    app.get('/',function(req,res) {
         request.query(`select * from REPORTS`, function(err,result) {
             if(err) console.log(err);
-            if(allClients.length === 0) allClients = result.recordset;
-            else {
-                allClients.forEach(elem => {
-                    elem.ADDRESS == result.recordset[elem.ID - 1]['ADDRESS'];
-                    elem.APPNAME == result.recordset[elem.ID - 1]['APPNAME'];
-                    elem.APPTYPE == result.recordset[elem.ID - 1]['APPTYPE'];
-                })
-            }
-        })
+            allClients = result.recordset;
+                res.render(__dirname + '\\views\\main.ejs',{allClients:allClients,clientLogs:sorter.sort(clientLogs).asc('timestamp'),part:'projects'});
+        });
     });
+    
+        app.get('/reset', function(req,res) {
+            var request = new sql.Request();
+            request.query(`select * from REPORTS`, function(err,result) {
+                if(err) console.log(err);
+                if(allClients.length === 0) allClients = result.recordset;
+                else {
+                    allClients.forEach(elem => {
+                        elem.ADDRESS == result.recordset[elem.ID - 1]['ADDRESS'];
+                        elem.APPNAME == result.recordset[elem.ID - 1]['APPNAME'];
+                        elem.APPTYPE == result.recordset[elem.ID - 1]['APPTYPE'];
+                    })
+                }
+            })
+        });
+    
+        app.get('/logs',function (req,res){
+            if(typeof req.query.id === 'undefined') res.send(clientLogs);
+            res.render(__dirname + '\\views\\main.ejs',{logs: sorter.sort(clientLogs.filter(elem => elem.SocketID == req.query.id)).asc('timestamp'),part:'logs'})
+        });
 
-    app.get('/logs',function (req,res){
-        if(typeof req.query.id === 'undefined') res.send(clientLogs);
-        res.render(__dirname + '\\views\\main.ejs',{logs: sorter.sort(clientLogs.filter(elem => elem.SocketID == req.query.id)).asc('timestamp'),part:'logs'})
-        // res.send(clientLogs.filter(elem => elem.SocketID == req.query.id))
-    });
-
+        app.get('/server_state', function(req,res) {
+            res.render(__dirname + '\\views\\main.ejs',{serverStates:serverStates,part:'servers'});
+        });
+    
+        app.get('/bot_server_state', function(req,res) {
+            res.send(serverStates);
+        });
+        
+io.on('connection', socket => {
     app.get('/quit', function(req,res) {
         socket.to(req.query.id).emit('quit');
         allClients.forEach(elem => {
@@ -66,6 +76,7 @@ io.on('connection', socket => {
     });
 
     app.get('/init', function(req,res) {
+        console.log(req.query.id)
         socket.to(req.query.id).emit('init');
         allClients.forEach(elem => {
             if(elem.ID == req.query.id)
@@ -76,17 +87,9 @@ io.on('connection', socket => {
         res.render(__dirname + '\\views\\main.ejs',{allClients:allClients,clientLogs:sorter.sort(clientLogs).asc('timestamp'),part:'projects'});
     });
 
-    app.get('/server_state', function(req,res) {
-        res.render(__dirname + '\\views\\main.ejs',{serverStates:serverStates,part:'servers'});
-    });
-
-    app.get('/bot_server_state', function(req,res) {
-        res.send(serverStates);
-    });
-
     console.log('\x1b[32m%s\x1b[0m', 'Client connected with id: ' + socket.id + ' from address: ' + socket.client.conn.remoteAddress);
 
-    socket.on('client', (data) => {
+    socket.on('client', async (data) => {
         allClients.forEach(elem => {
             if(elem.APPNAME === data)
             {
@@ -95,7 +98,6 @@ io.on('connection', socket => {
                 elem['status'] = 0;
             }
         });
-        socket.join(socket.id);
         console.log(data + ' connected!');
     });
 
@@ -105,8 +107,16 @@ io.on('connection', socket => {
 
     // message handler
     socket.on('message', (data) => {
+        console.log('DATA: ' + data)
+        console.log('socketid: ' + socket.id)
         client = allClients.find(elem => elem.SocketID == socket.id );
+
+        console.log(allClients)
         clientLogs.push({'SocketID':socket.id,'Appname':client.APPNAME,'message':data,'timestamp':Date.now()})
+    });
+
+    socket.on('reconnect', (data) => {
+        console.log(data)
     });
     // app exit handler
     socket.on('quit', (data) => {
@@ -143,7 +153,6 @@ io.on('connection', socket => {
             k++;
         });
     });
-});
 });
 });
 
