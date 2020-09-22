@@ -1,21 +1,61 @@
-<table class="table table-hover">
-    <thead>
-        <tr>
-        <th style="text-align:center" scope="col">Hostname</th>
-        <th style="text-align:center" scope="col">IP</th>
-        <th style="text-align:center" scope="col">PID</th>
-        <th style="text-align:center" scope="col">Status</th>
-        </tr>
-    </thead>
-    <% serverStates.reverse().forEach(function(app) { %>
-    <tbody>
-        <th style="text-align:center"><%= app.hostname %></th>
-        <th style="text-align:center"><%= app.ip %></th>
-        <th style="text-align:center"><%= app.pid %></th>
-        <th style="text-align:center">
-            <% if (app.status == 'ok') {%><span class="badge badge-pill badge-success">&nbsp;</span><%}%>
-            <% if (app.status == 'end') {%><span class="badge badge-pill badge-danger">&nbsp;</span><%}%>
-        </th>
-    </tbody>
-    <% }); %>
-</table>
+<!-- Button trigger modal -->
+<br>
+<button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">
+    Add New Server Entry
+</button>
+<a href="/server_state" type="button" class="btn btn-warning">
+    Refresh
+</a>
+<div class="conatiner row">
+    <div class="col-3"></div>
+    <div class="col-6">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                <th style="text-align:center" scope="col">Hostname</th>
+                <th style="text-align:center" scope="col">IP</th>
+                </tr>
+            </thead>
+            <% serverStates.forEach(function(app) { %>
+                <% if (app.STATUS == 1) {%>
+                <tr class="table-success">
+                <%}%>
+                <% if (app.STATUS == 0) {%>
+                    <tr class="table-danger">
+                <%}%>
+                <th style="text-align:center"><%= app.HOSTNAME %></th>
+                <th style="text-align:center"><%= app.IP %></th>
+            </tr>
+            <% }); %>
+        </table>
+    </div>
+    <div class="col-3"></div>
+</div>  
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">New Server Entry</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form method="POST" action="/add_server">
+            <div class="modal-body">
+                <div class="form-group">
+                  <label for="inputHost">Hostname</label>
+                  <input type="text" class="form-control" name='hostname'>
+                </div>
+                <div class="form-group">
+                  <label for="inputIP">IP</label>
+                  <input type="text" class="form-control" name="IP">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </form>
+      </div>
+    </div>
+</div>

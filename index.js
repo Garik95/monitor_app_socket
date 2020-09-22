@@ -4,11 +4,15 @@ const io = require('socket.io')(server);
 const path = require('path');
 const sql = require("mssql");
 const sorter = require('sort-nested-json');
+const reqst = require('request');
+var bodyParser = require('body-parser');
+const { connect } = require('socket.io-client');
 // var express = express();
 var allClients = [];
 var clientLogs = [];
 var serverStates = [];
 app.use(require('express').static(path.join(__dirname, 'public')));
+app.use(bodyParser.urlencoded({ extended: false }))
 app.set('view engine', 'ejs');
 
 var config = {
@@ -35,7 +39,19 @@ sql.connect(config, function (err) {
         request.query(`select * from REPORTS`, function(err,result) {
             if(err) console.log(err);
             if(allClients.length === 0) allClients = result.recordset;
-                res.render(__dirname + '\\views\\main.ejs',{allClients:allClients,clientLogs:sorter.sort(clientLogs).asc('timestamp'),part:'projects'});
+            else {
+                for(i=0;i<result.recordset.length;i++){
+                    k = 0;
+                    for(j=0;j<allClients.length;j++)
+                    {
+                        if(result.recordset[i].ADDRESS == allClients[j].ADDRESS) k++;
+                    }
+                    if(k == 0){
+                        allClients.push({ADDRESS:result.recordset[i].ADDRESS,APPNAME:result.recordset[i].APPNAME,APPTYPE:result.recordset[i].APPTYPE});
+                    }
+                }
+            }
+            res.render(__dirname + '\\views\\main.ejs',{allClients:allClients,clientLogs:sorter.sort(clientLogs).asc('timestamp'),part:'projects'});
         });
     });
     
@@ -60,11 +76,44 @@ sql.connect(config, function (err) {
         });
 
         app.get('/server_state', function(req,res) {
-            res.render(__dirname + '\\views\\main.ejs',{serverStates:serverStates,part:'servers'});
+            servers = [];
+            request.query('select * from SERVERS', function(err,result) {
+                if(err) console.log(err)
+                servers = result.recordset;
+                reqst('http://localhost:4001',function(err,resl,body){
+                    if(err) console.log(err);    
+                    servers.forEach(rec => {
+                        JSON.parse(body).forEach(b=>{ 
+                            if(rec.IP == b.toString()) {
+                                rec.STATUS = 1;
+                            }
+                        })
+                    })
+                    res.render(__dirname + '\\views\\main.ejs',{serverStates:servers,part:'servers'});
+                });
+            })
         });
     
         app.get('/bot_server_state', function(req,res) {
-            res.send(serverStates);
+            res.send(servers);
+        });
+
+        app.post('/add_server', function(req,res) {
+            request.query("INSERT INTO SERVERS(IP,HOSTNAME) VALUES(N'" + req.body.IP + "',N'" + req.body.hostname + "');", function(err,result){
+                if(err) console.log(err);
+                if(result.rowsAffected[0] == 1) {
+                    res.redirect('/server_state');
+                }
+            });
+        });
+
+        app.post('/add_project', function(req,res) {
+            request.query("INSERT INTO REPORTS(ADDRESS,APPNAME,APPTYPE) VALUES(N'" + req.body.address + "',N'" + req.body.appname + "',N'" + req.body.apptype + "');", function(err,result){
+                if(err) console.log(err);
+                if(result.rowsAffected[0] == 1) {
+                    res.redirect('/');
+                }
+            });
         });
         
 io.on('connection', socket => {
@@ -106,9 +155,9 @@ io.on('connection', socket => {
         console.log(data + ' connected!');
     });
 
-    socket.on('server', (data) =>{
-        serverStates = data;
-    });
+    // socket.on('server', (data) =>{
+    //     serverStates = data;
+    // });
 
     // message handler
     socket.on('message', (data) => {
@@ -160,6 +209,4 @@ io.on('connection', socket => {
     });
 });
 });
-
-
 server.listen(3000);
